@@ -16,7 +16,6 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
-
 public class MainClass extends GraphicsProgram implements ActionListener {
     private Clip clip;
 
@@ -42,10 +41,12 @@ public class MainClass extends GraphicsProgram implements ActionListener {
     public GOval food;
     private ArrayList<GRect> snakeBody;
     private int snakeX, snakeY, snakeWidth, snakeHeight;
-    public Timer timer = new Timer(1000 / 10, this);  // 10 frames per second
+    private static final int INITIAL_DELAY = 1000 / 10;  // 10 frames per second
+    public Timer timer = new Timer(INITIAL_DELAY, this);
     private boolean isPlaying, isGameOver, gameOverDisplayed;
     private int score, previousScore;
     private int highScore = 0; // Store the high score
+    private int loopsSinceLastFood = 0; // Track the number of loops since the last food was eaten
     private GLabel scoreLabel;
     private GLabel highScoreLabel;
     private GLabel instructions1;
@@ -104,7 +105,6 @@ public class MainClass extends GraphicsProgram implements ActionListener {
         add(instructions1);
         add(instructions2);
     }
-
 
     boolean blockKey = false;
     String currentDirection = "";
@@ -224,10 +224,14 @@ public class MainClass extends GraphicsProgram implements ActionListener {
         }
     }
 
-
     public void addScore() {
         score++;
         scoreLabel.setLabel("Hi! Your current score is: " + score);
+        loopsSinceLastFood = 0; // Reset the loop counter
+
+        // Increase game speed slightly
+        int newDelay = Math.max(timer.getDelay() - 10, 50); // Ensure the delay doesn't go below 50 ms
+        timer.setDelay(newDelay);
     }
 
     public void removeInstructions() {
@@ -336,6 +340,7 @@ public class MainClass extends GraphicsProgram implements ActionListener {
     public void restartGame() {
         removeAll();
         snakeBody.clear();
+        timer.setDelay(INITIAL_DELAY); // Reset the timer delay
         timer.restart();
         isGameOver = false;
         gameOverDisplayed = false;
